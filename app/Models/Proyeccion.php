@@ -2,29 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Proyeccion extends Model
 {
-    use HasFactory;
-
+    // Nombre de la tabla
     protected $table = 'proyeccion';
+
+    // Clave primaria personalizada
     protected $primaryKey = 'id_proyeccion';
+
+    // Sin timestamps
     public $timestamps = false;
 
+    // Campos asignables
     protected $fillable = [
         'id_emprendimiento',
         'intereses',
         'ingreso_mensual',
     ];
 
-    // Cast para el campo array de PostgreSQL
+    // Convierte automáticamente JSON <-> array
     protected $casts = [
         'intereses' => 'array',
     ];
 
-    // Relación inversa: Una proyección pertenece a un emprendimiento
+    /**
+     * Relación inversa 1:1 con Emprendimiento
+     */
     public function emprendimiento()
     {
         return $this->belongsTo(Emprendimiento::class, 'id_emprendimiento', 'id_emprendimiento');
