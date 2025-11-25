@@ -20,7 +20,6 @@ class EmprendimientoResource extends JsonResource
             'mobiliario' => $this->mobiliario,
             'signos_externos' => $this->signos_externos,
             
-            // Incluimos TODAS las relaciones si han sido cargadas
             'proyeccion' => new ProyeccionResource($this->whenLoaded('proyeccion')),
             'sectores' => SectorResource::collection($this->whenLoaded('sectores')),
             'apoyos' => ApoyoResource::collection($this->whenLoaded('apoyos')),

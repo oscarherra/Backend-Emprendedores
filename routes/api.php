@@ -5,35 +5,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmprendedorController;
 use App\Http\Controllers\Api\StatisticsController;
+use App\Http\Controllers\CaptchaController;
 
-/*
-|--------------------------------------------------------------------------
-| Rutas de la API
-|--------------------------------------------------------------------------
-|
-| Aquí se definen los endpoints que tu aplicación de Vue llamará.
-|
-*/
 
-// ============================================
-//   RUTAS PÚBLICAS (No requieren autenticación)
-// ============================================
-
-// Ruta para que el ADMIN inicie sesión.
 Route::post('/login', [AuthController::class, 'login']);
 
-// Ruta PÚBLICA para que cualquier persona envíe los datos del formulario de emprendedor.
-// Esta es la corrección clave: la ruta de creación está fuera del grupo protegido.
+Route::post('/captcha/verify', [CaptchaController::class, 'verify']);
 Route::post('/emprendedores', [EmprendedorController::class, 'store']);
 
+Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
 
-// ===============================================================
-//   RUTAS PROTEGIDAS (Solo para el ADMIN que ha iniciado sesión)
-// ===============================================================
-Route::middleware('auth:sanctum')->group(function () {
-
-    // --- Rutas para la GESTIÓN de Emprendedores (ver, actualizar, borrar) ---
-    // Estas son las acciones que el administrador puede realizar desde el dashboard.
+        // --- Rutas para la gestión de Emprendedores ---
     Route::get('/emprendedores', [EmprendedorController::class, 'index']);
     Route::get('/emprendedores/{emprendedor}', [EmprendedorController::class, 'show']);
     Route::put('/emprendedores/{emprendedor}', [EmprendedorController::class, 'update']);

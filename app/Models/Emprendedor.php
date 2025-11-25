@@ -12,10 +12,8 @@ class Emprendedor extends Model
     // Clave primaria personalizada
     protected $primaryKey = 'id_emprendedor';
 
-    // Sin timestamps (no hay created_at / updated_at en tu DB)
     public $timestamps = false;
 
-    // Campos que se pueden asignar en masa
     protected $fillable = [
   'nombre','apellido1','apellido2','cedula','fecha_nacimiento','telefono',
   'correo_electronico','direccion','distrito','comunidad','sexo',
@@ -28,10 +26,7 @@ class Emprendedor extends Model
   'fecha_nacimiento' => 'date',
 ];
 
-    /**
-     * Relación 1:N -> Emprendimientos
-     * Un emprendedor puede tener varios emprendimientos.
-     */
+
     public function emprendimientos() { return $this->hasMany(Emprendimiento::class, 'id_emprendedor'); }
 
 }

@@ -142,12 +142,10 @@ class EmprendedorController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            // ------------ TRANSACCIÓN ------------
             $emprendedor = null;
 
             DB::transaction(function () use ($request, &$emprendedor, $algunoEmpr) {
 
-                // 1) Emprendedor
                 $emprendedor = Emprendedor::create([
                     'nombre'             => $request->nombre,
                     'apellido1'          => $request->apellido1,
@@ -164,7 +162,6 @@ class EmprendedorController extends Controller
                     'certificaciones'    => $request->input('certificaciones'),
                 ]);
 
-                // 2) Emprendimiento (si se envió)
                 if ($algunoEmpr || $request->filled('nombre_emprendimiento')) {
 
                     $emprendimiento = $emprendedor->emprendimientos()->create([
@@ -176,16 +173,13 @@ class EmprendedorController extends Controller
                         'numero_empleados'            => $request->input('numero_empleados'),
                         'mobiliario'                  => $request->input('mobiliario'),
                         'signos_externos'             => $request->input('signos_externos'),
-                        // Logo deshabilitado; dejar explícito
                         'tiene_logo'                  => false,
                         'logo_path'                   => null,
-                        // Extras
                         'sector_text'                 => $request->input('sector'),
                         'participo_feria'             => $request->input('participo_feria') === 'Si',
                         'cuales_ferias'               => $request->input('cuales_ferias'),
                     ]);
 
-                    // 2.1 Proyección
                     if ($request->hasAny(['intereses', 'ingreso_mensual'])) {
                         $emprendimiento->proyeccion()->create([
                             'intereses'       => $request->input('intereses', []),
@@ -193,33 +187,28 @@ class EmprendedorController extends Controller
                         ]);
                     }
 
-                    // 2.2 Sector (catálogo + pivot)
                     if ($request->filled('sector')) {
                         $sector = Sector::firstOrCreate(['nombre_sector' => $request->sector]);
                         $emprendimiento->sectores()->sync([$sector->id_sector]);
                     }
 
-                    // 2.3 Formalizaciones
                     if (!empty($request->formalizaciones)) {
                         $formalizacionIds = Formalizacion::whereIn('tipo_formalizacion', (array)$request->formalizaciones)
                             ->pluck('id_formalizacion');
                         $emprendimiento->formalizaciones()->sync($formalizacionIds);
                     }
 
-                    // 2.4 Apoyos
                     if (!empty($request->apoyos)) {
                         $apoyoIds = Apoyo::whereIn('tipo_apoyo', (array)$request->apoyos)
                             ->pluck('id_apoyo');
                         $emprendimiento->apoyos()->sync($apoyoIds);
                     }
 
-                    // 2.5 Necesidades (crea si no existe)
                     if (!empty($request->necesidades) && !empty($request->necesidades[0])) {
                         $necesidad = Necesidad::firstOrCreate(['descripcion_necesidad' => $request->necesidades[0]]);
                         $emprendimiento->necesidades()->sync([$necesidad->id_necesidad]);
                     }
 
-                    // 2.6 Redes sociales (pivot con url)
                     $redes = $request->input('redes', []);
                     if (!is_array($redes)) $redes = [];
                     foreach (['facebook','instagram','tiktok','website','whatsapp'] as $k) {
@@ -239,7 +228,6 @@ class EmprendedorController extends Controller
                         }
                     }
 
-                    // 2.7 SOLO IMÁGENES (sin logo)
                     $paths = [];
                     if ($request->hasFile('imagenes')) {
                         foreach ((array) $request->file('imagenes') as $file) {

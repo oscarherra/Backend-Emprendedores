@@ -12,19 +12,15 @@ class StatisticsController extends Controller
     public function index()
     {
         try {
-            // --- CÁLCULOS PRINCIPALES ---
-
-            // KPI 1: Total de emprendedores registrados (Este ya era correcto)
+            // KPI 1: Total de EMPRENDEDORES
             $totalEmprendedores = Emprendedor::count();
 
             // KPI 2: Total de emprendimientos ACTIVOS
-            // ¡CORRECCIÓN! Ahora solo contamos emprendimientos que tienen un emprendedor válido asociado.
-            $totalEmprendimientos = DB::table('emprendimiento')
+          $totalEmprendimientos = DB::table('emprendimiento')
                 ->join('emprendedor', 'emprendimiento.id_emprendedor', '=', 'emprendedor.id_emprendedor')
                 ->count();
 
-            // GRÁFICO 1: Emprendimientos por Sector
-            // ¡CORRECCIÓN! También aplicamos el JOIN aquí para no contar registros fantasma.
+            // GRÁFICO 1: Emprendimientos por Sector (para un gráfico de barras)
             $emprendimientosPorSector = DB::table('sector')
                 ->join('emprendimiento_sector', 'sector.id_sector', '=', 'emprendimiento_sector.id_sector')
                 ->join('emprendimiento', 'emprendimiento_sector.id_emprendimiento', '=', 'emprendimiento.id_emprendimiento')
@@ -34,7 +30,6 @@ class StatisticsController extends Controller
                 ->orderBy('total', 'desc')
                 ->get();
 
-            // --- NUEVOS GRÁFICOS ---
 
             // GRÁFICO 2: Emprendedores por Distrito (para un gráfico de pastel)
             $emprendedoresPorDistrito = DB::table('emprendedor')
@@ -43,7 +38,6 @@ class StatisticsController extends Controller
                 ->orderBy('total', 'desc')
                 ->get();
 
-            // GRÁFICO 3: Apoyos más solicitados (para un gráfico de barras horizontal)
             $apoyosSolicitados = DB::table('apoyo')
                 ->join('emprendimiento_apoyo', 'apoyo.id_apoyo', '=', 'emprendimiento_apoyo.id_apoyo')
                 ->select('apoyo.tipo_apoyo', DB::raw('COUNT(emprendimiento_apoyo.id_emprendimiento) as total'))

@@ -21,7 +21,6 @@ class Emprendimiento extends Model
         'mobiliario',
         'signos_externos',
 
-        // Campos adicionales usados en el controlador
         'tiene_logo',
         'sector_text',
         'participo_feria',
@@ -36,17 +35,13 @@ class Emprendimiento extends Model
         'participo_feria' => 'boolean',
     ];
 
-    /**
-     * RELACIONES
-     */
 
-    // Emprendimiento pertenece a un Emprendedor
     public function emprendedor()
     {
         return $this->belongsTo(Emprendedor::class, 'id_emprendedor', 'id_emprendedor');
     }
 
-    // Relaciones M:N
+
     public function apoyos()
     {
         return $this->belongsToMany(
@@ -62,7 +57,7 @@ class Emprendimiento extends Model
         return $this->belongsToMany(
             Feria::class,
             'emprendimiento_feria',
-            'id_emprendimeinto', // ⚠️ según tu esquema real, ojo con la m de más
+            'id_emprendimeinto', 
             'id_feria'
         );
     }

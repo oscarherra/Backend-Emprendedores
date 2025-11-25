@@ -18,7 +18,7 @@ class Feria extends Model
             Emprendimiento::class,
             'emprendimiento_feria',
             'id_feria',
-            'id_emprendimeinto' // en tu tabla el campo está con “m” de más
+            'id_emprendimeinto'
         );
     }
 }

@@ -16,18 +16,6 @@ class EmprendedorResource extends JsonResource
     {
         $e = $this->resource;
 
-        // Si no confías en que todas las relaciones estén cargadas,
-        // puedes dejar esto comentado y usamos defensas abajo.
-        // $this->loadMissing([
-        //     'emprendimientos.apoyos',
-        //     'emprendimientos.ferias',
-        //     'emprendimientos.formalizaciones',
-        //     'emprendimientos.necesidades',
-        //     'emprendimientos.redesSociales',
-        //     'emprendimientos.sectores',
-        //     'emprendimientos.proyeccion',
-        // ]);
-
         // Emprendimientos (si no está cargado devolvemos colección vacía segura)
         $emps = $e->relationLoaded('emprendimientos')
             ? $e->emprendimientos
@@ -47,20 +35,27 @@ class EmprendedorResource extends JsonResource
             'distrito'         => $e->distrito,
             'comunidad'        => $e->comunidad,
             'sexo'             => $e->sexo,
-            'fecha_nacimiento' => $e->fecha_nacimiento,
+
+            // ⇢ Fecha formateada (YYYY-MM-DD). Cambia a ->format('d/m/Y') si prefieres latino.
+            'fecha_nacimiento' => $e->fecha_nacimiento
+                ? Carbon::parse($e->fecha_nacimiento)->toDateString() // "YYYY-MM-DD"
+                : null,
+
             'edad'             => $e->fecha_nacimiento ? Carbon::parse($e->fecha_nacimiento)->age : null,
             'escolaridad'      => $e->escolaridad,     // cast array en el modelo
             'certificaciones'  => $e->certificaciones,
 
             // ===== Emprendimientos =====
             'emprendimientos' => $emps->map(function ($em) {
-                // URLs públicas para imágenes/logo (disk public)
+                // URLs públicas ABSOLUTAS para imágenes/logo (disk public)
                 $imgs = collect($em->imagenes_json ?? [])
                     ->filter()
-                    ->map(fn ($p) => Storage::disk('public')->url($p))
+                    ->map(fn ($p) => url(Storage::disk('public')->url($p)))  // http://127.0.0.1:8000/storage/...
                     ->values();
 
-                $logo = $em->logo_path ? Storage::disk('public')->url($em->logo_path) : null;
+                $logo = $em->logo_path
+                    ? url(Storage::disk('public')->url($em->logo_path))
+                    : null;
 
                 // Relaciones opcionales (defensas si no existen)
                 $apoyos          = method_exists($em, 'apoyos')
